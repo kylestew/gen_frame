@@ -45,6 +45,33 @@ void clear_framebuffer_3bit(uint8_t color) {
     memset(framebuffer, packed, BUFFER_SIZE); // Fill framebuffer
 }
 
+void write_pixel(uint8_t *buffer, int width, int x, int y, uint8_t color) {
+    int index   = (y * width + x) / 2; // 2 pixels per byte
+    bool is_low = (x % 2) == 0;
+
+    uint8_t orig = buffer[index];
+    if (is_low) {
+        // Lower nibble (bits 2:0)
+        orig = (orig & 0xF0) | (color & 0x07);
+    } else {
+        // Upper nibble (bits 6:4)
+        orig = (orig & 0x0F) | ((color & 0x07) << 4);
+    }
+
+    buffer[index] = orig;
+}
+
+void generate_xor_pattern(uint8_t *buffer, int width, int height) {
+    // memset(buffer, 0, (width * height) / 2); // Clear buffer
+
+    for (int y = 0; y < height; y++) {
+        for (int x = 0; x < width; x++) {
+            uint8_t color = (x ^ y) & 0x07; // 3-bit XOR pattern
+            write_pixel(buffer, width, x, y, color);
+        }
+    }
+}
+
 int main() {
     stdio_init_all();
     sleep_ms(500);
@@ -54,12 +81,15 @@ int main() {
     gpio_set_function(STATUS_LED, GPIO_FUNC_SIO);
     gpio_set_dir(STATUS_LED, GPIO_OUT);
 
-    clear_framebuffer_3bit(4); // green
-
     while (true) {
         gpio_put(STATUS_LED, 1);
 
-        // TODO: I think this may be packed wrong
+        // clear display buffer
+        clear_framebuffer_3bit(7); // clean color
+
+        // draw something
+        generate_xor_pattern(framebuffer, WIDTH, HEIGHT);
+
         display.update(framebuffer, BUFFER_SIZE);
 
         sleep_ms(STATUS_LED);
