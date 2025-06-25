@@ -1,5 +1,7 @@
+#include "colors.h"
 #include "lib/uc8159.hpp"
 #include "pico/stdlib.h"
+#include "sketch.c"
 
 #include <cstring> // memory allocation
 
@@ -61,15 +63,32 @@ void write_pixel(uint8_t *buffer, int width, int x, int y, uint8_t color) {
     buffer[index] = orig;
 }
 
-void generate_xor_pattern(uint8_t *buffer, int width, int height) {
-    // memset(buffer, 0, (width * height) / 2); // Clear buffer
+uint8_t read_pixel(uint8_t *buffer, int width, int x, int y) {
+    int index   = (y * width + x) / 2; // 2 pixels per byte
+    bool is_low = (x % 2) == 0;
 
-    for (int y = 0; y < height; y++) {
-        for (int x = 0; x < width; x++) {
-            uint8_t color = (x ^ y) & 0x07; // 3-bit XOR pattern
-            write_pixel(buffer, width, x, y, color);
-        }
+    uint8_t orig = buffer[index];
+    if (is_low) {
+        // Lower nibble (bits 2:0)
+        return orig & 0x07;
+    } else {
+        // Upper nibble (bits 6:4)
+        return (orig >> 4) & 0x07;
     }
+}
+
+// Indexed color set/get functions for the sketch system
+void setPixelColor(int x, int y, Color color) {
+    if (x >= 0 && x < WIDTH && y >= 0 && y < HEIGHT) {
+        write_pixel(framebuffer, WIDTH, x, y, (uint8_t) color);
+    }
+}
+
+Color getPixelColor(int x, int y) {
+    if (x >= 0 && x < WIDTH && y >= 0 && y < HEIGHT) {
+        return (Color) read_pixel(framebuffer, WIDTH, x, y);
+    }
+    return BLACK;
 }
 
 int main() {
@@ -87,8 +106,8 @@ int main() {
         // clear display buffer
         clear_framebuffer_3bit(7); // clean color
 
-        // draw something
-        generate_xor_pattern(framebuffer, WIDTH, HEIGHT);
+        // draw using the sketch system
+        drawSketch(setPixelColor, getPixelColor, WIDTH, HEIGHT);
 
         display.update(framebuffer, BUFFER_SIZE);
 
