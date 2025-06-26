@@ -119,7 +119,7 @@ typedef void (*SetPixelFunc)(int x, int y, unsigned char r, unsigned char g, uns
 typedef void (*GetPixelFunc)(int x, int y, unsigned char *r, unsigned char *g, unsigned char *b);
 
 // External sketch function declaration
-extern void drawSketch(SetPixelColorFunc setPixelColor, GetPixelColorFunc getPixelColor, int width, int height);
+extern void drawSketch(int width, int height, SetPixelColorFunc setPixelColor, GetPixelColorFunc getPixelColor);
 
 // Write PPM image to file
 void writePPM(const char *filename, int width, int height) {
@@ -153,7 +153,7 @@ int main() {
     memset(buffer, 0, sizeof(buffer));
 
     // Call the sketch function with our indexed color functions
-    drawSketch(setPixelColor, getPixelColor, WIDTH, HEIGHT);
+    drawSketch(WIDTH, HEIGHT, setPixelColor, getPixelColor);
 
     // Write the image to disk
     writePPM("output.ppm", WIDTH, HEIGHT);

@@ -107,7 +107,7 @@ int main() {
         clear_framebuffer_3bit(7); // clean color
 
         // draw using the sketch system
-        drawSketch(setPixelColor, getPixelColor, WIDTH, HEIGHT);
+        drawSketch(WIDTH, HEIGHT, setPixelColor, getPixelColor);
 
         display.update(framebuffer, BUFFER_SIZE);
 
