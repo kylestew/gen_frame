@@ -1,12 +1,15 @@
 #include "../colors.h"
-#include "cube_data.h"
+#include "f22.h"
+// #include "cube_data.h"
 #include "rendering.h"
 
+#include <math.h>
 #include <stdlib.h>
+#include <time.h>
 
 vec3_t camera_position = {0, 0, -6};
 float fov_factor       = 640.0;
-vec3_t rotation        = {1.0, 2.0, 3.0};
+vec3_t rotation;
 
 vec2_t project(vec3_t point, float fov_factor) {
     vec2_t projected_point = {
@@ -19,18 +22,19 @@ vec2_t project(vec3_t point, float fov_factor) {
 void drawSketch(int width, int height, SetPixelColorFunc setPixelColor, GetPixelColorFunc getPixelColor) {
     Color colors[] = {BLACK, WHITE, GREEN, BLUE, RED, YELLOW, ORANGE};
 
-    // TODO: randomize these
-    // cube_mesh.rotation.x = 1.0;
-    // cube_mesh.rotation.y = 2.0;
-    // cube_mesh.rotation.z = 3.0;
+    srand(time(NULL)); // Use current time as seed
 
-    for (int i = 0; i < cube_mesh.face_count; i++) {
-        face_t face = cube_mesh.faces[i];
+    rotation.x = ((float) rand() / RAND_MAX) * (2.0f * M_PI);
+    rotation.y = ((float) rand() / RAND_MAX) * (2.0f * M_PI);
+    rotation.z = ((float) rand() / RAND_MAX) * (2.0f * M_PI);
+
+    for (int i = 0; i < mesh.face_count; i++) {
+        face_t face = mesh.faces[i];
 
         // gather 3d vertices for face (triangle)
-        vec3_t v1 = cube_mesh.vertices[face.a];
-        vec3_t v2 = cube_mesh.vertices[face.b];
-        vec3_t v3 = cube_mesh.vertices[face.c];
+        vec3_t v1 = mesh.vertices[face.a];
+        vec3_t v2 = mesh.vertices[face.b];
+        vec3_t v3 = mesh.vertices[face.c];
 
         // apply 3D transformations
         v1 = vec3_rotate_x(v1, rotation.x);
@@ -61,9 +65,13 @@ void drawSketch(int width, int height, SetPixelColorFunc setPixelColor, GetPixel
         p3.x += (width / 2);
         p3.y += (height / 2);
 
+        // select a random color (skip black)
+        int color_count    = sizeof(colors) / sizeof(colors[0]);
+        Color random_color = colors[1 + rand() % (color_count - 1)];
+
         // draw triangle
-        draw_line(p1.x, p1.y, p2.x, p2.y, colors[1], setPixelColor);
-        draw_line(p2.x, p2.y, p3.x, p3.y, colors[1], setPixelColor);
-        draw_line(p3.x, p3.y, p1.x, p1.y, colors[1], setPixelColor);
+        draw_line(p1.x, p1.y, p2.x, p2.y, random_color, setPixelColor);
+        draw_line(p2.x, p2.y, p3.x, p3.y, random_color, setPixelColor);
+        draw_line(p3.x, p3.y, p1.x, p1.y, random_color, setPixelColor);
     }
 }

@@ -31,7 +31,7 @@ static const face_t cube_faces[12] = {
 };
 
 // A statically declared mesh that references the above arrays
-static const mesh_t cube_mesh = {
+static const mesh_t mesh = {
     .vertices = (vec3_t*)cube_vertices,
     .vertex_count = sizeof(cube_vertices) / sizeof(cube_vertices[0]),
     .faces = (face_t*)cube_faces,
