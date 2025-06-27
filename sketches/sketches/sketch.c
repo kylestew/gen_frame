@@ -1,65 +1,69 @@
 #include "../colors.h"
+#include "cube_data.h"
+#include "rendering.h"
 
-#include <stdbool.h>
-#include <stdint.h>
-#include <stdio.h>
 #include <stdlib.h>
-#include <time.h>
 
-void swap(int *a, int *b) {
-    int temp = *a;
-    *a       = *b;
-    *b       = temp;
-}
+vec3_t camera_position = {0, 0, -6};
+float fov_factor       = 640.0;
+vec3_t rotation        = {1.0, 2.0, 3.0};
 
-void draw_line(int x0, int y0, int x1, int y1, uint32_t color, SetPixelColorFunc setPixelColor) {
-    // Bresenham - incremental error algorithm
-    // determines which pixel is closest to the ideal line between two points, and
-    // steps one pixel at a time in either the x or y direction
-    bool steep = abs(x1 - x0) < abs(y1 - y0);
-    if (steep) { // if line is steep, we transpose it
-        swap(&x0, &y0);
-        swap(&x1, &y1);
-    }
-    if (x0 > x1) { // make it left-to-right
-        swap(&x0, &x1);
-        swap(&y0, &y1);
-    }
-
-    int dx = x1 - x0;
-    int dy = abs(y1 - y0);
-
-    int err   = 0;
-    int ystep = (y0 < y1) ? 1 : -1;
-    int y     = y0;
-
-    for (int x = x0; x <= x1; x++) {
-        if (steep) { // if transposed, de-transpose
-            setPixelColor(y, x, color);
-        } else {
-            setPixelColor(x, y, color);
-        }
-
-        err += 2 * dy;
-        if (err > dx) {
-            y += ystep;
-            err -= 2 * dx;
-        }
-    }
+vec2_t project(vec3_t point, float fov_factor) {
+    vec2_t projected_point = {
+        .x = (fov_factor * point.x) / point.z,
+        .y = (fov_factor * point.y) / point.z,
+    };
+    return projected_point;
 }
 
 void drawSketch(int width, int height, SetPixelColorFunc setPixelColor, GetPixelColorFunc getPixelColor) {
     Color colors[] = {BLACK, WHITE, GREEN, BLUE, RED, YELLOW, ORANGE};
 
-    srand(time(NULL)); // Use current time as seed
+    // TODO: randomize these
+    // cube_mesh.rotation.x = 1.0;
+    // cube_mesh.rotation.y = 2.0;
+    // cube_mesh.rotation.z = 3.0;
 
-    int x0 = rand() % width;
-    int x1 = rand() % width;
-    int y0 = rand() % height;
-    int y1 = rand() % height;
+    for (int i = 0; i < cube_mesh.face_count; i++) {
+        face_t face = cube_mesh.faces[i];
 
-    printf("Screen dimensions: %d x %d\n", width, height);
-    printf("Line coordinates: (%d, %d) to (%d, %d)\n", x0, y0, x1, y1);
+        // gather 3d vertices for face (triangle)
+        vec3_t v1 = cube_mesh.vertices[face.a];
+        vec3_t v2 = cube_mesh.vertices[face.b];
+        vec3_t v3 = cube_mesh.vertices[face.c];
 
-    draw_line(x0, y0, x1, y1, colors[1], setPixelColor);
+        // apply 3D transformations
+        v1 = vec3_rotate_x(v1, rotation.x);
+        v1 = vec3_rotate_y(v1, rotation.y);
+        v1 = vec3_rotate_z(v1, rotation.z);
+        v2 = vec3_rotate_x(v2, rotation.x);
+        v2 = vec3_rotate_y(v2, rotation.y);
+        v2 = vec3_rotate_z(v2, rotation.z);
+        v3 = vec3_rotate_x(v3, rotation.x);
+        v3 = vec3_rotate_y(v3, rotation.y);
+        v3 = vec3_rotate_z(v3, rotation.z);
+
+        // apply camera position
+        v1.z -= camera_position.z;
+        v2.z -= camera_position.z;
+        v3.z -= camera_position.z;
+
+        // project to 2D
+        vec2_t p1 = project(v1, fov_factor);
+        vec2_t p2 = project(v2, fov_factor);
+        vec2_t p3 = project(v3, fov_factor);
+
+        // offset point to middle of screen (origin correct)
+        p1.x += (width / 2);
+        p1.y += (height / 2);
+        p2.x += (width / 2);
+        p2.y += (height / 2);
+        p3.x += (width / 2);
+        p3.y += (height / 2);
+
+        // draw triangle
+        draw_line(p1.x, p1.y, p2.x, p2.y, colors[1], setPixelColor);
+        draw_line(p2.x, p2.y, p3.x, p3.y, colors[1], setPixelColor);
+        draw_line(p3.x, p3.y, p1.x, p1.y, colors[1], setPixelColor);
+    }
 }

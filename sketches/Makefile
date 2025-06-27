@@ -3,8 +3,8 @@ CFLAGS = -Wall -Wextra -std=c99
 LDFLAGS = -lm
 
 TARGET = image_generator
-SOURCES = main.c sketches/sketch.c
-OBJECTS = main.o sketches/sketch.o
+SOURCES = main.c sketches/sketch.c sketches/rendering.c sketches/vector.c
+OBJECTS = main.o sketches/sketch.o sketches/rendering.o sketches/vector.o
 
 .PHONY: all clean
 
