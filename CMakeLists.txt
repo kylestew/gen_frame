@@ -37,7 +37,13 @@ project(inky C CXX ASM)
 pico_sdk_init()
 
 # Add executable. Default name is the project name, version 0.1
-add_executable(inky inky.cpp lib/uc8159.cpp)
+add_executable(inky
+    inky.cpp
+    lib/uc8159.cpp
+    sketches/sketches/sketch.c
+    sketches/sketches/rendering.c
+    sketches/sketches/vector.c
+)
 
 # program info
 pico_set_program_name(inky "inky")
@@ -55,6 +61,7 @@ target_link_libraries(inky
 target_include_directories(inky PRIVATE
     ${CMAKE_CURRENT_LIST_DIR}
     ${CMAKE_CURRENT_LIST_DIR}/lib
+    ${CMAKE_CURRENT_LIST_DIR}/sketches/sketches
 )
 
 # Add any user requested libraries

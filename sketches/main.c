@@ -1,4 +1,5 @@
 #include "colors.h"
+#include "hardware/adc.h"
 
 #include <stdint.h>
 #include <stdio.h>
@@ -151,6 +152,13 @@ void writePPM(const char *filename, int width, int height) {
 int main() {
     // Initialize buffer to black
     memset(buffer, 0, sizeof(buffer));
+
+    // seed random numbers
+    adc_init();
+    adc_gpio_init(26); // Or leave pin floating (GPIO26 is ADC0)
+    adc_select_input(0);
+    uint16_t noise = adc_read();
+    srand(noise);
 
     // Call the sketch function with our indexed color functions
     drawSketch(WIDTH, HEIGHT, setPixelColor, getPixelColor);

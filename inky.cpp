@@ -1,7 +1,10 @@
 #include "colors.h"
 #include "lib/uc8159.hpp"
 #include "pico/stdlib.h"
-#include "sketch.c"
+
+extern "C" { // I don't understand why this was needed
+#include "sketch.h"
+}
 
 #include <cstring> // memory allocation
 

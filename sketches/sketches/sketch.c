@@ -1,3 +1,5 @@
+#include "sketch.h"
+
 #include "../colors.h"
 #include "f22.h"
 // #include "cube_data.h"
@@ -7,7 +9,7 @@
 #include <stdlib.h>
 #include <time.h>
 
-vec3_t camera_position = {0, 0, -6};
+vec3_t camera_position = {0, 0, -4};
 float fov_factor       = 640.0;
 vec3_t rotation;
 
@@ -22,7 +24,7 @@ vec2_t project(vec3_t point, float fov_factor) {
 void drawSketch(int width, int height, SetPixelColorFunc setPixelColor, GetPixelColorFunc getPixelColor) {
     Color colors[] = {BLACK, WHITE, GREEN, BLUE, RED, YELLOW, ORANGE};
 
-    srand(time(NULL)); // Use current time as seed
+    // srand(time(NULL)); // Use current time as seed
 
     rotation.x = ((float) rand() / RAND_MAX) * (2.0f * M_PI);
     rotation.y = ((float) rand() / RAND_MAX) * (2.0f * M_PI);
